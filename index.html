@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mealheiro Virtual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .reset {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mealheiro Virtual</h1>
+        <p>Total acumulado: <strong>€<span id="total">0</span></strong></p>
+        <button onclick="adicionarValor()">+1€</button>
+        <button class="reset" onclick="resetarValor()">Reset</button>
+    </div>
+
+    <script>
+        const BIN_ID = "67cec2418960c979a56ee4da";  
+        const API_KEY = "$2a$10$KyXa9Yfd3p/WZnRz4LgV0.g8OcYqR0zSiwxDintCa1pCpCqBWUY7";  
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        async function buscarTotal() {
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { "X-Master-Key": API_KEY }
+                });
+                const data = await response.json();
+                document.getElementById("total").innerText = data.record.total;
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+            }
+        }
+
+        async function atualizarTotal(novoTotal) {
+            try {
+                await fetch(API_URL, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": API_KEY
+                    },
+                    body: JSON.stringify({ total: novoTotal })
+                });
+                document.getElementById("total").innerText = novoTotal;
+            } catch (error) {
+                console.error("Erro ao atualizar dados:", error);
+            }
+        }
+
+        async function adicionarValor() {
+            let totalAtual = parseInt(document.getElementById("total").innerText);
+            totalAtual++;
+            await atualizarTotal(totalAtual);
+        }
+
+        async function resetarValor() {
+            await atualizarTotal(0);
+        }
+
+        setInterval(buscarTotal, 2000);
+
+        buscarTotal();
+    </script>
+</body>
+</html>
+
